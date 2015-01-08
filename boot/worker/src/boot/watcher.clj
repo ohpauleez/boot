@@ -87,6 +87,7 @@
            (when watch-key
              (if-not (.isValid watch-key)
                (do (util/dbug "invalid watch key %s\n" (.watchable watch-key))
+                   (.offer queue ::event)
                    (recur))
                (do (doseq [event (.pollEvents watch-key)]
                      (let [dir     (.toFile (.watchable watch-key))
@@ -98,7 +99,7 @@
                          (try (doreg service changed)
                               (catch Throwable t
                                 (util/dbug "error registering %s: %s\n" (.watchable watch-key) t))))
-                       (.offer queue (.getPath changed))))
+                       (.offer queue ::event)))
                    (if-not (.reset watch-key)
                      (util/dbug "failed to reset watch key %s\n" (.watchable watch-key)))
                    (recur)))))
